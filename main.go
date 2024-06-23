@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"log/slog"
 	"os"
 	"sheriff-server/database"
@@ -25,6 +24,7 @@ func main() {
 	})
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 
 	database.SetupMongoDB()
 
@@ -43,6 +43,7 @@ func main() {
 		return c.JSON("hello")
 	})
 
-	log.Fatal(app.Listen(*port))
+	slog.Info("Server up at port:3000")
+	app.Listen(*port)
 
 }
