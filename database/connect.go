@@ -2,8 +2,7 @@ package database
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -15,30 +14,33 @@ import (
 
 func SetupMongoDB() (*mongo.Collection, *mongo.Client, context.Context, context.CancelFunc) {
 	err := godotenv.Load()
-    if err != nil {
-        log.Fatalf("Error loading .env file")
-    }
-	dbUrl := os.Getenv("MONGO_URL")
-	
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-  	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbUrl))
 	if err != nil {
-	 panic(fmt.Sprintf("Mongo DB Connect issue %s", err))
+		slog.Error("Error Loading Envs")
+	}
+	dbUrl := os.Getenv("MONGO_URL")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbUrl))
+	if err != nil {
+		slog.Error("Mongo DB Connect issue", err)
+		panic(err)
 	}
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-	 panic(fmt.Sprintf("Mongo DB ping issue %s", err))
+		slog.Error("Mongo DB ping issue", err)
+		panic(err)
 	}
 	collection := client.Database("sheriff").Collection("Users")
+	slog.Info("Database connected Successfully")
 	return collection, client, ctx, cancel
-   }
-   
-   func CloseConnection(client *mongo.Client, context context.Context, cancel context.CancelFunc) {
+}
+
+func CloseConnection(client *mongo.Client, context context.Context, cancel context.CancelFunc) {
 	defer func() {
-	 cancel()
-	 if err := client.Disconnect(context); err != nil {
-	  panic(err)
-	 }
-	 fmt.Println("Close connection is called")
+		cancel()
+		if err := client.Disconnect(context); err != nil {
+			panic(err)
+		}
+		slog.Info("MongoDB Connection Closed")
 	}()
-   }
+}
