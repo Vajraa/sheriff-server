@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"sheriff-server/router"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	slogfiber "github.com/samber/slog-fiber"
@@ -38,11 +40,8 @@ func main() {
 	app.Use(recover.New())
 	app.Use(slogfiber.NewWithConfig(logger, config))
 
-	v1 := app.Group("/api/v1")
+	router.AuthRoutes(app)
 
-	v1.Get("/list", func(c *fiber.Ctx) error {
-		return c.JSON("hello")
-	})
 
 	go func() {
 		if err := app.Listen(*port); err != nil {
