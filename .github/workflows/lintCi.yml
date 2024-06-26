@@ -1,0 +1,24 @@
+name: golangci-lint
+
+on:
+  pull_request:
+    types: [opened , synchronize , reopened]
+    branches: [main , development]
+
+
+jobs:
+  run-linter:
+    name: "CI Linter"
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      
+      - name: Golangci-lint
+        uses: golangci/golangci-lint-action@v6.0.1
+
