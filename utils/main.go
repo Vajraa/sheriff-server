@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -34,14 +33,14 @@ func GetGithubAccessToken(code string) string {
         bytes.NewBuffer(requestJSON),
     )
     if reqerr != nil {
-        log.Panic("Request creation failed")
+        slog.Error("Request creation failed")
     }
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("Accept", "application/json")
 
     resp, resperr := http.DefaultClient.Do(req)
     if resperr != nil {
-        log.Panic("Request failed")
+        slog.Error("Request failed")
     }
     defer resp.Body.Close()
 
@@ -59,7 +58,7 @@ func GetGithubData(access_token string) string {
         slog.Error("API Request creation failed")
     }
 
-    authorizationHeader := fmt.Sprintf("token %s", access_token)
+    authorizationHeader := fmt.Sprintf("Bearer %s", access_token)
     req.Header.Set("Authorization", authorizationHeader)
 
     response, resperr := http.DefaultClient.Do(req)

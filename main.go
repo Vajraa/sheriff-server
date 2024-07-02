@@ -51,7 +51,7 @@ func main() {
 	}()
 
 	slog.Info("Server up at port:3000")
-	_, client, dbContext, dbCancel := database.SetupMongoDB()
+	client, dbContext, dbCancel := database.SetupMongoDB()
 
 	quit := make(chan os.Signal)
 

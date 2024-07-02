@@ -12,7 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func SetupMongoDB() (*mongo.Collection, *mongo.Client, context.Context, context.CancelFunc) {
+var mongoClient *mongo.Client
+
+
+func GetCollection(name string) *mongo.Collection {
+	return mongoClient.Database("sheriff-server").Collection(name)
+}
+
+func SetupMongoDB() (*mongo.Client, context.Context, context.CancelFunc) {
 	err := godotenv.Load()
 	if err != nil {
 		slog.Error("Error Loading Envs")
@@ -30,9 +37,10 @@ func SetupMongoDB() (*mongo.Collection, *mongo.Client, context.Context, context.
 		slog.Error("Mongo DB ping issue", err)
 		panic(err)
 	}
-	collection := client.Database("sheriff").Collection("Users")
 	slog.Info("Database connected Successfully")
-	return collection, client, ctx, cancel
+
+	mongoClient = client
+	return client, ctx, cancel
 }
 
 func CloseConnection(client *mongo.Client, context context.Context, cancel context.CancelFunc) {
