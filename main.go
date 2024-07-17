@@ -6,9 +6,12 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	configuration "sheriff-server/config"
 	"sheriff-server/database"
 	"syscall"
 	"time"
+
+	"sheriff-server/router"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -38,11 +41,7 @@ func main() {
 	app.Use(recover.New())
 	app.Use(slogfiber.NewWithConfig(logger, config))
 
-	v1 := app.Group("/api/v1")
-
-	v1.Get("/list", func(c *fiber.Ctx) error {
-		return c.JSON("hello")
-	})
+	router.AuthRoutes(app)
 
 	go func() {
 		if err := app.Listen(*port); err != nil {
@@ -52,7 +51,8 @@ func main() {
 	}()
 
 	slog.Info("Server up at port:3000")
-	_, client, dbContext, dbCancel := database.SetupMongoDB()
+	configuration.LoadEnv()
+	client, dbContext, dbCancel := database.SetupMongoDB()
 
 	quit := make(chan os.Signal, 1)
 
