@@ -45,7 +45,7 @@ func main() {
 
 	go func() {
 		if err := app.Listen(*port); err != nil {
-			slog.Error("Error Occured During Startup", err)
+			slog.Error("Error Occured During Startup", "error", err)
 			panic(err)
 		}
 	}()
@@ -54,7 +54,7 @@ func main() {
 	configuration.LoadEnv()
 	client, dbContext, dbCancel := database.SetupMongoDB()
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
@@ -66,12 +66,12 @@ func main() {
 	defer cancel()
 
 	if err := app.ShutdownWithContext(ctx); err != nil {
-		slog.Error("Error Occurred During Shutdown", err)
+		slog.Error("Error Occurred During Shutdown", "error", err)
 	}
 
-	select {
-	case <-ctx.Done():
-		database.CloseConnection(client, dbContext, dbCancel)
-		slog.Info("Server Shutdown Sequence Complete")
-	}
+
+	<-ctx.Done()
+	database.CloseConnection(client, dbContext, dbCancel)
+	slog.Info("Server Shutdown Sequence Complete")
+
 }
