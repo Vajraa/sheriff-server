@@ -47,8 +47,11 @@ func GetGithubAccessToken(code string) string {
     respbody, _ := io.ReadAll(resp.Body)
 
     var ghresp githubAccessTokenResponse
-    json.Unmarshal(respbody, &ghresp)
+    err := json.Unmarshal(respbody, &ghresp)
 
+    if err != nil {
+        slog.Error("Error unmarshalling JSON: %v", "error", err)
+    }
     return ghresp.AccessToken
 }
 

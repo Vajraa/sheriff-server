@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"log/slog"
 	"time"
 
@@ -20,7 +19,11 @@ func GithubLogin(c *fiber.Ctx) error {
 	redirectURL := fmt.Sprintf(
 	"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",githubClientID, "http://localhost:3000/v1/auth/login/github/callback")
 
-	c.Redirect(redirectURL)
+	err := c.Redirect(redirectURL)
+    if err != nil {
+        slog.Error("Error redirecting: %v", "error", err)
+        return err 
+    }
 	return nil
 }
 
@@ -68,7 +71,7 @@ func GithubLoginCallback(c *fiber.Ctx) error {
 	
 	var parsedData GithubData
 	if err := json.Unmarshal([]byte(githubData), &parsedData); err != nil {
-		log.Println("Error unmarshalling JSON:", err)
+		slog.Error("Error unmarshalling JSON:", "error", err)
 		return c.Status(400).JSON(fiber.Map{"error": "cannot parse JSON"})
 	}
 
@@ -82,10 +85,10 @@ func GithubLoginCallback(c *fiber.Ctx) error {
 	coll := database.GetCollection("users")
 	_, err := coll.InsertOne(c.Context(), user)
 	if err != nil {
-		slog.Error("Error inserting document:", err)
+		slog.Error("Error inserting document: ", "error", err)
 		return c.Status(500).JSON(fiber.Map{"error": "cannot insert document"})
 	}
 
-	log.Println("Inserted document:", user)
+	slog.Info("Inserted document:", "user", user)
 	return c.Status(200).JSON(user)
 }
