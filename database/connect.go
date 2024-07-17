@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -14,16 +13,11 @@ import (
 
 var mongoClient *mongo.Client
 
-
 func GetCollection(name string) *mongo.Collection {
 	return mongoClient.Database("sheriff-server").Collection(name)
 }
 
 func SetupMongoDB() (*mongo.Client, context.Context, context.CancelFunc) {
-	err := godotenv.Load()
-	if err != nil {
-		slog.Error("Error Loading Envs")
-	}
 	dbUrl := os.Getenv("MONGO_URL")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

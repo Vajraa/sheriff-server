@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	configuration "sheriff-server/config"
 	"sheriff-server/database"
 	"syscall"
 	"time"
@@ -42,7 +43,6 @@ func main() {
 
 	router.AuthRoutes(app)
 
-
 	go func() {
 		if err := app.Listen(*port); err != nil {
 			slog.Error("Error Occured During Startup", err)
@@ -51,6 +51,7 @@ func main() {
 	}()
 
 	slog.Info("Server up at port:3000")
+	configuration.LoadEnv()
 	client, dbContext, dbCancel := database.SetupMongoDB()
 
 	quit := make(chan os.Signal)
