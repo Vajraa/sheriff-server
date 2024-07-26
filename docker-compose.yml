@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: .
+    image: vajraa-server:latest
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URL: mongodb://mongo:27017/vajraa
+    depends_on:
+      - mongo
+    
+  
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db
