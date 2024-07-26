@@ -1,4 +1,4 @@
-.PHONY: run tidy lint
+.PHONY: run tidy lint build
 
 run:
 	go run main.go
@@ -11,3 +11,6 @@ lint:
 
 hello:
 	echo "Hello All"
+
+build:
+	go build -o main .
