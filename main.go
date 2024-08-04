@@ -42,6 +42,10 @@ func main() {
 	app.Use(slogfiber.NewWithConfig(logger, config))
 
 	router.AuthRoutes(app)
+	app.Get("/", func(c *fiber.Ctx) error {
+		c.Status(200).JSON(fiber.Map{"message": "Welcome to Vajraa Server"})
+		return nil
+	})
 
 	go func() {
 		if err := app.Listen(*port); err != nil {
@@ -68,7 +72,6 @@ func main() {
 	if err := app.ShutdownWithContext(ctx); err != nil {
 		slog.Error("Error Occurred During Shutdown", "error", err)
 	}
-
 
 	<-ctx.Done()
 	database.CloseConnection(client, dbContext, dbCancel)
